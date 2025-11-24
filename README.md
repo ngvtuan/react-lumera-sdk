@@ -1,11 +1,11 @@
 <div align=center>
 
-  [<img height="100px" src="./public/lumera-symbol.svg"/>](https://lumera.io/)
+  [<img height="100px" src="https://raw.githubusercontent.com/ngvtuan/react-lumera-sdk/refs/heads/main/public/lumera.svg"/>](https://lumera.io/)
 
 </div>
 
 <p align=center>
-  <b>Lumera Cascade</b>
+  <b>React lumera sdk</b>
 </p>
 
 <div align=center>
@@ -18,7 +18,7 @@
 
 ---
 
-Lumera Cascade is a built component for use with the Lumera SDK in Next.js.
+React lumera sdk is a built component for use with the Lumera SDK in Next.js.
 
 ## Installation
 
@@ -27,55 +27,19 @@ You can install this library via NPM or YARN.
 ### NPM
 
 ```bash
-npm i lumera-cascade
+npm i react-lumera-sdk
+
 ```
 
 ### YARN
 
 ```bash
-yarn add lumera-cascade
+yarn add react-lumera-sdk
 ```
-
-## Example Usage
-
-After reading and performing the previous steps, you should be able to import the library and use it like in this example:
-
-```javascript
-import React, { useState } from 'react';
-import { QrReader } from 'pastel-qr-scan';
-
-const Test = (props) => {
-  const [data, setData] = useState('No result');
-
-  return (
-    <>
-      <QrScan
-        onResult={(result) => {
-          if (result) {
-            setData(result?.text);
-          }
-        }}
-      />
-      <p>{data}</p>
-    </>
-  );
-};
-```
-
-## Component API
-
-The `Lumera Cascade` component has the following props:
-
-| Properties          | Types                                                                                           | Default Value            | Description                                              |
-| ------------------- | ----------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------- |
-| onResult            | `function`                                                                                      | none                     | Scan event handler                                       |
-| videoWidth             | `string`                                                                                        | `100%`                  | The width for the video element                             |
-| videoHeight             | `string`                                                                                        | `100%`                  | The height for the video element                             |
-| className           | `string`                                                                                         | none                     | ClassName for the container element.                     |
 
 ## Issues
 
-Please, open an [issue](https://github.com/pastelnetwork/pastel-qr-scan/issues) following one of the issues templates. We will do our best to fix them.
+Please, open an [issue](https://github.com/ngvtuan/react-lumera-sdk/issues) following one of the issues templates. We will do our best to fix them.
 
 ## License
 

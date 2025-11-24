@@ -1,15 +1,16 @@
-import { 
-    createLumeraClient, 
-    createBatchedSignaturePrompter, 
-    createDefaultTxPrompter,
-} from "@lumera-protocol/sdk-js";
+import * as lumeraClient from "@lumera-protocol/sdk-js";
 
-import { ILumeraClient } from '../types';
-
-const keplrSignaturePrompter = createBatchedSignaturePrompter();
-const keplrTxPrompter = createDefaultTxPrompter();
+import { ILumeraClient, IDownload, IUpload } from '../types';
 
 export const useLumeraClient = () => {
+    const createBatchedSignaturePrompter = () => {
+        return lumeraClient.createBatchedSignaturePrompter()
+    }
+
+    const createDefaultTxPrompter = () => {
+        return lumeraClient.createDefaultTxPrompter()
+    }
+
     const getLumeraClient = async (config: ILumeraClient) => {
         const { 
             chainId,
@@ -25,7 +26,7 @@ export const useLumeraClient = () => {
         if (!chainId || !rpcUrl || !lcdUrl || !snapiUrl || !signer || !address) {
             return null
         }
-        const client = await createLumeraClient({
+        const client = await lumeraClient.createLumeraClient({
             chainId,
             rpcUrl,
             lcdUrl,
@@ -41,7 +42,7 @@ export const useLumeraClient = () => {
         return client;
     }
 
-    const fetchSupernode = async (config: ILumeraClient) => {
+    const getSupernodes = async (config: ILumeraClient) => {
         try {
             const client = await getLumeraClient(config);
             if (!client) {
@@ -54,27 +55,46 @@ export const useLumeraClient = () => {
         }
     }
 
-    const uploadCascade = async (files: File[], config: ILumeraClient) => {
+    const getKeplrSigner = async (chainId: string) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const signer: any = await lumeraClient.getKeplrSigner(chainId);
+        return signer;
+    }
+
+    const downloadCascade = async (item: IDownload, lumeraClientConfig: ILumeraClient) => {
+        // lastActionId: string, config: ILumeraClient, pollInterval = 2000, timeout = 300000
         try {
-            const client = await getLumeraClient(config);
+            const client = await getLumeraClient(lumeraClientConfig);
+            if (!client) {
+                return null;
+            }
+            const stream = await client.Cascade.downloader.download(item.lastActionId, {
+                pollInterval: item.pollInterval || 2000,
+                timeout: item.timeout || 300000,
+            });
+
+            return stream;
+        } catch (error) {
+            throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
+        }
+    }
+
+    const uploadCascade = async (item: IUpload, lumeraClientConfig: ILumeraClient) => {
+        try {
+            const client = await getLumeraClient(lumeraClientConfig);
              if (!client) {
                 return null;
             } 
-            const selectedFile = files[0];
-            const fileBuffer = await selectedFile.arrayBuffer();
-            const fileBytes = new Uint8Array(fileBuffer);
-            const expirationTime = Math.floor(Date.now() / 1000 + 86400 * 1.5).toString();
-
-            const result = await client.Cascade.uploader.uploadFile(fileBytes, {
-                fileName: selectedFile.name,
-                isPublic: false,
-                expirationTime: expirationTime,
+            const result = await client.Cascade.uploader.uploadFile(item.fileBytes, {
+                fileName: item.fileName,
+                isPublic: item.isPublic || false,
+                expirationTime: item.expirationTime || Math.floor(Date.now() / 1000 + 86400 * 1.5).toString(),
                 taskOptions: {
-                pollInterval: 2000,
-                timeout: 300000,
+                    pollInterval: item.pollInterval || 2000,
+                    timeout: item.timeout || 300000,
                 },
-                signaturePrompter: keplrSignaturePrompter,
-                txPrompter: keplrTxPrompter,
+                signaturePrompter: item.signaturePrompter,
+                txPrompter: item.txPrompter,
             });
             return result
         } catch (error) {
@@ -82,45 +102,12 @@ export const useLumeraClient = () => {
         }
     }
 
-    const downloadCascade = async (lastActionId: string, config: ILumeraClient, pollInterval = 2000, timeout = 300000) => {
-        try {
-            const client = await getLumeraClient(config);
-            if (!client) {
-                return null;
-            }
-            const stream = await client.Cascade.downloader.download(lastActionId, {
-                pollInterval,
-                timeout,
-            });
-            // Read the stream
-            const reader = stream.getReader();
-            const chunks: Uint8Array[] = [];
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                chunks.push(value);
-            }
-
-            // Combine chunks
-            const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-            const downloadedBytes = new Uint8Array(totalLength);
-            let offset = 0;
-            for (const chunk of chunks) {
-                downloadedBytes.set(chunk, offset);
-                offset += chunk.length;
-            }
-
-            return downloadedBytes;
-        } catch (error) {
-            throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
-        }
-    }
-
     return {
-        fetchSupernode,
-        uploadCascade,
+        createBatchedSignaturePrompter,
+        createDefaultTxPrompter,
+        getSupernodes,
+        getKeplrSigner,
         downloadCascade,
+        uploadCascade,
     }
 }
