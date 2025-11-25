@@ -30,6 +30,6 @@ export interface IUpload {
     expirationTime?: string;
     pollInterval?: number;
     timeout?: number;
-    signaturePrompter: TSignaturePrompter;
-    txPrompter: TxPrompter;
+    signaturePrompter?: TSignaturePrompter;
+    txPrompter?: TxPrompter;
 }
