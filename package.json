@@ -1,6 +1,6 @@
 {
   "name": "react-lumera-sdk",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": ".",
   "author": "Lumera Protocol",
   "license": "MIT",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@cosmjs/proto-signing": "^0.37.0",
-    "@lumera-protocol/sdk-js": "^0.2.2",
+    "@lumera-protocol/sdk-js": "^0.2.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "rq-library-wasm": "^1.0.2"
