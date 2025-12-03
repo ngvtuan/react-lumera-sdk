@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as lumeraClient from "@lumera-protocol/sdk-js";
+import type { EncodeObject } from "@cosmjs/proto-signing";
 
 import { ILumeraClient, IDownload, IUpload } from '../types';
 
@@ -24,7 +25,7 @@ export const useLumeraClient = () => {
       timeout = 45000,
       maxRetries = 3,
     } = config;
-    if (!chainId || !rpcUrl || !lcdUrl || !snapiUrl || !signer || !address) {
+    if (!chainId || !rpcUrl || !lcdUrl || !snapiUrl || !signer) {
       return null
     }
     const client = await lumeraClient.createLumeraClient({
@@ -50,6 +51,58 @@ export const useLumeraClient = () => {
         return null;
       }
       const items = await client.Blockchain.Supernode.listSupernodes();
+      return items;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
+    }
+  }
+
+  const simulate = async (config: ILumeraClient, address: string, msgs: EncodeObject[], memo: string) => {
+    try {
+      const client = await getLumeraClient(config);
+      if (!client) {
+        return null;
+      }
+      const items = await client.Blockchain.Tx.simulate(address, msgs, memo)
+      return items;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
+    }
+  }
+
+  const getSupernodeParams = async (config: ILumeraClient) => {
+    try {
+      const client = await getLumeraClient(config);
+      if (!client) {
+        return null;
+      }
+      const items = await client.Blockchain.Supernode.getParams();
+      return items;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
+    }
+  }
+
+  const getSupernodeByAddress = async (config: ILumeraClient, supernodeAddress: string) => {
+    try {
+      const client = await getLumeraClient(config);
+      if (!client) {
+        return null;
+      }
+      const items = await client.Blockchain.Supernode.getSupernodeByAddress(supernodeAddress);
+      return items;
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
+    }
+  }
+
+  const getSupernode = async (config: ILumeraClient, validatorAddress: string) => {
+    try {
+      const client = await getLumeraClient(config);
+      if (!client) {
+        return null;
+      }
+      const items = await client.Blockchain.Supernode.getSupernode(validatorAddress);
       return items;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'An unknown error occurred.')
@@ -102,6 +155,10 @@ export const useLumeraClient = () => {
   }
 
   return {
+    simulate,
+    getSupernodeParams,
+    getSupernodeByAddress,
+    getSupernode,
     createBatchedSignaturePrompter,
     createDefaultTxPrompter,
     getSupernodes,
